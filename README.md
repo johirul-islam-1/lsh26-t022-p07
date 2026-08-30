@@ -51,6 +51,8 @@ https://github.com/johirul-islam-1/lsh26-t022-p07
 - [Demo Walkthrough](#demo-walkthrough)
 - [Judge Summary](#judge-summary)
 - [License and Attribution](#license-and-attribution)
+- [Problem-Solving Method](#problem-solving-method)
+- [Team Contributions](#team-contributions)
 
 ---
 
@@ -2477,6 +2479,39 @@ Apache-2.0
 The reconciliation fixture used by the application was supplied by the LofiStack Hackathon organizers.
 
 No external commercial data source, hosted LLM API, stock-image library or third-party backend service is required by ReconFlow.
+
+---
+
+# Problem-Solving Method
+
+Our approach was to first understand how the two financial systems differ instead of trying to directly match every row.
+
+ReconFlow follows this process:
+
+1. Validate and profile the POS and settlement datasets.
+2. Normalize different transaction reference formats.
+3. Find high-trust seed matches.
+4. Learn the dominant settlement fee and clock offset from those seed matches.
+5. Score remaining candidates using reference, fee-adjusted amount and corrected-time evidence.
+6. Automatically clear only strong, unique and safe matches.
+7. Send ambiguous or conflicting transactions to human review.
+8. Allow reviewers to Accept, Reject or manually pair records.
+9. Recalculate reconciliation and financial totals after every human decision.
+
+We chose this deterministic approach because financial reconciliation needs reproducible, explainable and auditable decisions.
+
+A high similarity score alone is not considered enough for automatic clearing.
+
+---
+
+# Team Contributions
+
+| Member | GitHub | Major contribution |
+| --- | --- | --- |
+| Johirul Islam Zim | `johirul-islam-1` | Team leader and primary P07 developer. Built the ReconFlow reconciliation engine and P07 user interface, integrated the full workflow, handled debugging and testing, and prepared the final P07 submission. |
+| Fahad Hossain Touhid | `FH-TOUHID` | Primary developer for P12. Built the team's P12 solution and handled its main implementation and development. |
+| Mohammad Hasibur Rahman | `Hasib-2005` | Tested P12 locally, identified and reported bugs to the P12 developer, deployed the P12 application to Vercel, and verified the deployment. |
+| Toufiqul Hossain Siam | `siam1082` | Tested P07 ReconFlow locally, identified and reported bugs to the P07 developer, deployed the P07 application to Render, and verified the production deployment. |
 
 ---
 

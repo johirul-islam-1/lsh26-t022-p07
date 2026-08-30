@@ -1,1 +1,109 @@
-{}
+{
+  "release_version": "2.2",
+  "team_id": "LSH26-T022",
+  "problem_id": "P07",
+  "repository_name": "lsh26-t022-p07",
+  "live_url": "https://lsh26-t022-p07.onrender.com",
+  "demo_video_url_optional": "",
+  "event_start_code": "LSH26-8490-C900",
+  "repository_created_before_release": false,
+  "pre_event_materials": [
+    {
+      "name": "None",
+      "source_or_original_location": "N/A",
+      "what_was_present_before_6pm": "Repository was empty"
+    }
+  ],
+  "sample_data": {
+    "loads_published_fixture": true,
+    "method": "seeded on start",
+    "reset_instructions": "Use Reset Demo State in the application to clear reviewer decisions for the active case."
+  },
+  "problem_solving_method": "ReconFlow uses a deterministic multi-pass reconciliation method. It first validates and profiles the POS and settlement datasets, normalizes different transaction reference formats, discovers high-trust seed pairs, and learns the dominant settlement fee and clock offset from the data. It then scores possible transaction pairs using semantic reference, fee-adjusted amount and corrected-time evidence. Strong and unique matches are automatically reconciled, while ambiguous or conflicting cases are sent to human review with clear explanations. Reviewers can Accept, Reject or manually pair records, and every decision immediately recalculates the reconciliation result and financial totals.",
+  "requirements": {
+    "R1": {
+      "status": "complete",
+      "evidence": "Source Data UI; src/data/P07_reconciliation_public.json; src/features/reconciliation/SourceData.tsx"
+    },
+    "R2": {
+      "status": "complete",
+      "evidence": "System Fingerprint and Match Evidence UI; src/domain/reconciliation/reference.ts; src/domain/reconciliation/fingerprint.ts; src/domain/reconciliation/signals.ts; src/domain/reconciliation/scoring.ts"
+    },
+    "R3": {
+      "status": "complete",
+      "evidence": "Matched, Needs Review and Unmatched workflows; src/domain/reconciliation/reconcile.ts; src/domain/reconciliation/metrics.ts; src/features/reconciliation/MatchTabs.tsx"
+    },
+    "R4": {
+      "status": "complete",
+      "evidence": "Accept, Reject and Manual Pair workflows; src/domain/reconciliation/decisions.ts; src/features/reconciliation/ReviewCard.tsx; src/features/reconciliation/ManualPairDialog.tsx"
+    }
+  },
+  "team_members": [
+    {
+      "registered_name": "Johirul Islam Zim",
+      "github_username": "johirul-islam-1",
+      "major_contribution": "Team leader and primary P07 developer. Built the ReconFlow reconciliation engine and P07 user interface, integrated the complete workflow, handled debugging and testing, and prepared the final P07 submission.",
+      "evidence_paths_or_commits": [
+        "src/domain/reconciliation/",
+        "src/features/reconciliation/",
+        "f013a3b",
+        "3b34cc4",
+        "README.md#team-contributions"
+      ]
+    },
+    {
+      "registered_name": "Fahad Hossain Touhid",
+      "github_username": "FH-TOUHID",
+      "major_contribution": "Primary developer for the team's P12 solution. Built the P12 application and handled its main implementation and development.",
+      "evidence_paths_or_commits": [
+        "README.md#team-contributions",
+        "Primary implementation is in the team's separate P12 submission repository"
+      ]
+    },
+    {
+      "registered_name": "Mohammad Hasibur Rahman",
+      "github_username": "Hasib-2005",
+      "major_contribution": "Tested the P12 application locally, identified and reported bugs to the P12 developer, deployed the P12 application to Vercel, and verified the deployment.",
+      "evidence_paths_or_commits": [
+        "README.md#team-contributions",
+        "Testing and deployment work relates to the team's separate P12 submission repository"
+      ]
+    },
+    {
+      "registered_name": "Toufiqul Hossain Siam",
+      "github_username": "siam1082",
+      "major_contribution": "Tested the P07 ReconFlow application locally, identified and reported bugs to the P07 developer, deployed the P07 application to Render, and verified the production deployment.",
+      "evidence_paths_or_commits": [
+        "README.md#team-contributions",
+        "render.yaml",
+        "https://lsh26-t022-p07.onrender.com"
+      ]
+    }
+  ],
+  "major_design_decisions": [
+    "Used deterministic multi-signal reconciliation instead of an LLM for financial matching so results remain reproducible, testable and explainable.",
+    "Separated candidate evidence from auto-match safety so a high similarity score alone cannot automatically clear an ambiguous financial record.",
+    "Used semantic reference normalization together with learned settlement-fee and clock-offset relationships instead of exact string, amount and timestamp matching.",
+    "Used high-trust seed pairs to infer the relationship between the POS and settlement systems instead of hardcoding case-specific fee or time-offset values.",
+    "Used a Next.js modular monolith with a same-origin API to reduce deployment complexity and failure points during the hackathon.",
+    "Stored reviewer decisions and active-case state per case in browser localStorage for the MVP instead of introducing database infrastructure.",
+    "Represented money internally using integer poisha to reduce floating-point precision problems in financial calculations.",
+    "Preferred conservative human review over unsafe automatic matching when duplicates or competing candidates create ambiguity."
+  ],
+  "known_limitations": [
+    "The MVP loads the organizer-provided JSON fixture instead of supporting arbitrary CSV or XLSX uploads.",
+    "Reviewer state is stored in browser localStorage and is not synchronized across users or devices.",
+    "There is no authentication, shared audit database or multi-user approval workflow.",
+    "The MVP does not directly integrate with merchant POS systems, banks or settlement providers.",
+    "The learned fee and clock relationships are deterministic case-level inferences rather than continuously trained machine-learning models."
+  ],
+  "ai_tools_used": [
+    {
+      "tool": "ChatGPT / OpenAI",
+      "used_for": "Project planning, architecture and system-design assistance, implementation assistance, debugging, test design, documentation and hackathon development support.",
+      "how_output_was_verified": "AI-assisted work was reviewed by the team and verified using TypeScript type checking, ESLint, automated Vitest tests, all-case reconciliation regression tests, production Next.js builds, API smoke tests and manual browser testing."
+    }
+  ],
+  "licenses_file": "LICENSES.md",
+  "declaration": "The information above is complete and truthful to the best of the team's knowledge."
+}
