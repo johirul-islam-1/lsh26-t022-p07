@@ -25,8 +25,8 @@ export function MatchTabs({
   return (
     <article className="panel panel--wide">
       <div className="panel__head">
-        <div><span className="eyebrow">Reconciliation workspace</span><h3>Matched · Possible · Unmatched</h3></div>
-        <span className="badge badge--good"><CheckCircle2 size={14} /> Live recomputation</span>
+        <div><span className="eyebrow">Reconciliation workspace · {result.case.id}</span><h3>Matched · Possible · Unmatched</h3></div>
+        <span className="badge badge--good"><CheckCircle2 size={14} /> API truth · live recomputation</span>
       </div>
       <Tabs.Root defaultValue="matched">
         <Tabs.List className="tabs-list" aria-label="Reconciliation states">

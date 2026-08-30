@@ -102,7 +102,7 @@ export interface Metrics {
 }
 
 export interface ReconciliationResult {
-  build: 'b1-functional-mvp'
+  build: 'b2-competition'
   case: { id: string; today: string }
   profile: {
     referenceStyle: ReferenceStyle

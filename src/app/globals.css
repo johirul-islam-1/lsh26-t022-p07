@@ -122,3 +122,52 @@ h1 { margin: 5px 0 0; font-size: clamp(34px, 6vw, 58px); line-height: .94; lette
 @media (max-width: 1000px) { .metrics--five { grid-template-columns: repeat(3, 1fr); } .review-grid { grid-template-columns: 1fr; } }
 @media (max-width: 820px) { .signal-grid, .source-grid, .manual-pair, .pair-grid { grid-template-columns: 1fr; } .metrics--five { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 520px) { .metrics--five { grid-template-columns: 1fr; } .review-actions { flex-direction: column; } }
+
+/* Build 2 competition polish */
+.learned-rule { border: 1px solid #28557c; border-radius: 12px; padding: 13px; margin-bottom: 12px; background: linear-gradient(135deg, rgba(19,57,91,.55), rgba(10,31,52,.65)); display: grid; gap: 6px; }
+.learned-rule span { color: #7fa0c1; font-size: 11px; }
+.learned-rule strong { color: #e9f5ff; font-size: 14px; line-height: 1.45; }
+.support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+.support-meter { border: 1px solid #193754; border-radius: 10px; padding: 10px; background: #081725; }
+.support-meter > div:first-child { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #8fa9c4; font-size: 11px; }
+.support-meter span { display: inline-flex; align-items: center; gap: 5px; }
+.support-meter__bar { height: 5px; border-radius: 999px; overflow: hidden; background: #172c43; margin-top: 8px; }
+.support-meter__bar i { display: block; height: 100%; background: linear-gradient(90deg, #3a75ac, #4ec59c); }
+.fingerprint-note { display: flex; align-items: center; gap: 7px; margin-top: 12px; color: #7895b1; font-size: 11px; }
+.financial-panel { display: grid; align-content: start; }
+.financial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.financial-fact { border: 1px solid #1c3a57; border-radius: 10px; padding: 11px; background: #081725; display: grid; gap: 6px; }
+.financial-fact span { color: #7792ae; font-size: 10px; display: flex; align-items: center; gap: 5px; }
+.financial-fact strong { font-size: 15px; overflow-wrap: anywhere; }
+.resolution-strip { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.resolution-strip span { border: 1px solid #23425f; border-radius: 999px; padding: 5px 8px; color: #8faac6; font-size: 10px; }
+.resolution-strip b { color: #e7f2fd; }
+.financial-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 9px; }
+.financial-detail span { border-top: 1px solid #17304b; padding-top: 9px; color: #7893af; font-size: 10px; }
+.financial-detail b { color: #d9e8f7; }
+.exception-summary { margin-top: 12px; display: grid; gap: 7px; }
+.exception-summary > strong { color: #dce9f6; font-size: 11px; }
+.exception-summary > div { display: flex; gap: 6px; flex-wrap: wrap; }
+.exception-chip { border: 1px solid #654f26; background: #251d0c; color: #efd27d; border-radius: 7px; padding: 4px 6px; font-size: 9px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.exception-chip--clear { border-color: #28624f; background: #0d251e; color: #91dfbd; }
+.eod-summary { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; border-top: 1px solid #17304b; margin-top: 12px; padding-top: 12px; }
+.eod-summary p { margin: 5px 0 0; color: #9bb1c9; font-size: 11px; line-height: 1.5; }
+.reason-code { width: fit-content; border: 1px solid #425069; border-radius: 6px; padding: 3px 6px; color: #a9bed3; background: #0b1929; font-size: 9px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.manual-evidence-note { border: 1px solid #315c87; border-radius: 9px; padding: 9px 11px; margin-bottom: 10px; color: #b6d4f0; background: #10243b; font-size: 11px; line-height: 1.45; }
+.empty-state--compact { padding: 12px; text-align: left; }
+.audit-list { display: grid; gap: 7px; }
+.audit-entry { display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: center; border-top: 1px solid #172f49; padding-top: 8px; }
+.audit-entry:first-child { border-top: 0; padding-top: 0; }
+.audit-entry > div { display: grid; gap: 2px; }
+.audit-entry strong { font-size: 11px; color: #d9e7f5; }
+.audit-entry span, .audit-entry time { color: #718ca8; font-size: 10px; }
+.audit-icon { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 7px; border: 1px solid #284561; color: #b3cae0; background: #0a1b2d; }
+.audit-icon--accept { border-color: #28644f; color: #8ce0bd; background: #0d261e; }
+.audit-icon--reject { border-color: #734049; color: #f2aab2; background: #2a1419; }
+.audit-icon--manual { border-color: #315d88; color: #acd2f8; background: #102641; }
+.status-pill--manual, .status-pill--accepted { white-space: nowrap; }
+
+@media (max-width: 820px) {
+  .financial-grid, .financial-detail, .support-grid { grid-template-columns: 1fr; }
+  .eod-summary { grid-template-columns: 1fr; }
+}

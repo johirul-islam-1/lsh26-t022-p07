@@ -10,7 +10,7 @@ const emptyDecisions = { accepted: [], rejected: [], manual: [] }
 describe('full reconciliation', () => {
   it('classifies PUB-01 into matched, review and unmatched without record reuse', () => {
     const result = reconcile(pub01, { caseId: 'PUB-01', decisions: emptyDecisions })
-    expect(result.build).toBe('b1-functional-mvp')
+    expect(result.build).toBe('b2-competition')
     expect(result.matched.length).toBeGreaterThan(80)
     expect(result.review.length).toBeGreaterThan(0)
     expect(result.unmatched.pos.length).toBeGreaterThan(0)

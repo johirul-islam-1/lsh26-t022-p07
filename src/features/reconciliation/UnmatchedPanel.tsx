@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link2 } from 'lucide-react'
 import type { PairDecision, Transaction } from '@/schemas/reconciliation'
+import { canonicalizeReference } from '@/domain/reconciliation/reference'
 import { formatBdt } from '@/lib/format'
 
 export function UnmatchedPanel({ unmatched, busy, onManualPair }: {
@@ -26,8 +27,8 @@ export function UnmatchedPanel({ unmatched, busy, onManualPair }: {
   return (
     <div className="stack">
       <div className="unmatched-summary">
-        <div><strong>{unmatched.pos.length}</strong><span>POS without defensible counterpart</span></div>
-        <div><strong>{unmatched.settlement.length}</strong><span>Settlement without defensible counterpart</span></div>
+        <div><strong>{unmatched.pos.length}</strong><span>POS without defensible counterpart · MISSING_SETTLEMENT</span></div>
+        <div><strong>{unmatched.settlement.length}</strong><span>Settlement without defensible counterpart · MISSING_POS</span></div>
       </div>
       <div className="manual-pair">
         <div>
@@ -35,14 +36,14 @@ export function UnmatchedPanel({ unmatched, busy, onManualPair }: {
           <select id="manual-pos" value={posId} onChange={(event) => setPosId(event.target.value)}>
             {unmatched.pos.map((row) => <option key={row.id} value={row.id}>{row.id} · {row.reference} · {row.amount_bdt}</option>)}
           </select>
-          {pos && <TransactionPreview row={pos} />}
+          {pos && <TransactionPreview row={pos} side="pos" />}
         </div>
         <div>
           <label htmlFor="manual-settlement">Settlement record</label>
           <select id="manual-settlement" value={settlementId} onChange={(event) => setSettlementId(event.target.value)}>
             {unmatched.settlement.map((row) => <option key={row.id} value={row.id}>{row.id} · {row.reference} · {row.amount_bdt}</option>)}
           </select>
-          {settlement && <TransactionPreview row={settlement} />}
+          {settlement && <TransactionPreview row={settlement} side="settlement" />}
         </div>
       </div>
       <button
@@ -50,13 +51,22 @@ export function UnmatchedPanel({ unmatched, busy, onManualPair }: {
         disabled={busy || !pos || !settlement}
         onClick={() => pos && settlement && onManualPair({ posId: pos.id, settlementId: settlement.id })}
       >
-        <Link2 size={15} /> Confirm manual pair
+        <Link2 size={15} /> Confirm manual override
       </button>
-      <p className="helper-text">Manual pairing is recorded as a human decision, never as automatic confidence.</p>
+      <p className="helper-text">Manual pairing is recorded as a human decision, never presented as automatic confidence.</p>
     </div>
   )
 }
 
-function TransactionPreview({ row }: { row: Transaction }) {
-  return <div className="transaction-preview"><strong>{formatBdt(Number(row.amount_bdt) * 100)}</strong><span>{row.reference}</span><small>{row.time.replace('T', ' ')}</small></div>
+function TransactionPreview({ row, side }: { row: Transaction; side: 'pos' | 'settlement' }) {
+  const parsed = canonicalizeReference(row.reference)
+  const code = parsed ? (side === 'pos' ? 'MISSING_SETTLEMENT' : 'MISSING_POS') : 'REFERENCE_PARSE_FAILURE'
+  return (
+    <div className="transaction-preview">
+      <strong>{formatBdt(Number(row.amount_bdt) * 100)}</strong>
+      <span>{row.reference}</span>
+      <small>{row.time.replace('T', ' ')}</small>
+      <code className="reason-code">{code}</code>
+    </div>
+  )
 }

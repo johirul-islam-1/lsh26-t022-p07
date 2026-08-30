@@ -1,10 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { CheckCircle2, Database, GitCompareArrows, RotateCcw, ShieldCheck } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { CheckCircle2, Database, GitCompareArrows, RotateCcw, Save, ShieldCheck } from 'lucide-react'
 import type { PairDecision } from '@/schemas/reconciliation'
 import type { ReconciliationResult } from '@/domain/reconciliation/types'
+import { AuditTimeline } from './AuditTimeline'
+import { createAuditEntry, clearSavedReviewState, readSavedReviewState, writeSavedReviewState, type AuditEntry } from './audit'
 import { CaseSelector } from './CaseSelector'
+import { FinancialBridge } from './FinancialBridge'
 import { MatchTabs } from './MatchTabs'
 import { SummaryCards } from './SummaryCards'
 import { SystemFingerprint } from './SystemFingerprint'
@@ -18,12 +21,23 @@ function emptyDecisions(): Decisions {
 export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schemaVersion: string }) {
   const [caseId, setCaseId] = useState(caseIds[0] ?? '')
   const [decisions, setDecisions] = useState<Decisions>(emptyDecisions)
+  const [audit, setAudit] = useState<AuditEntry[]>([])
   const [result, setResult] = useState<ReconciliationResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const reconcileCase = useCallback(async (selectedCaseId: string, nextDecisions: Decisions, mode: 'load' | 'action' = 'load') => {
+  const decisionCount = useMemo(
+    () => decisions.accepted.length + decisions.rejected.length + decisions.manual.length,
+    [decisions]
+  )
+
+  const reconcileCase = useCallback(async (
+    selectedCaseId: string,
+    nextDecisions: Decisions,
+    nextAudit: AuditEntry[],
+    mode: 'load' | 'action' = 'load'
+  ) => {
     if (!selectedCaseId) return
     if (mode === 'load') setLoading(true)
     else setBusy(true)
@@ -38,6 +52,8 @@ export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schem
       if (!response.ok) throw new Error(`Reconciliation API failed (${response.status})`)
       setResult(body as ReconciliationResult)
       setDecisions(nextDecisions)
+      setAudit(nextAudit)
+      writeSavedReviewState(selectedCaseId, { version: 1, decisions: nextDecisions, audit: nextAudit })
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Unable to reconcile case')
     } finally {
@@ -47,9 +63,12 @@ export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schem
   }, [])
 
   useEffect(() => {
-    const fresh = emptyDecisions()
-    setDecisions(fresh)
-    void reconcileCase(caseId, fresh)
+    const saved = readSavedReviewState(caseId)
+    const nextDecisions = saved?.decisions ?? emptyDecisions()
+    const nextAudit = saved?.audit ?? []
+    setDecisions(nextDecisions)
+    setAudit(nextAudit)
+    void reconcileCase(caseId, nextDecisions, nextAudit)
   }, [caseId, reconcileCase])
 
   const acceptPair = (pair: PairDecision) => {
@@ -58,7 +77,8 @@ export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schem
       accepted: addUniquePair(decisions.accepted, pair),
       rejected: decisions.rejected.filter((item) => !samePair(item, pair))
     }
-    void reconcileCase(caseId, next, 'action')
+    const nextAudit = prependAudit(audit, createAuditEntry('ACCEPT', pair))
+    void reconcileCase(caseId, next, nextAudit, 'action')
   }
 
   const rejectPair = (pair: PairDecision) => {
@@ -67,7 +87,8 @@ export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schem
       rejected: addUniquePair(decisions.rejected, pair),
       accepted: decisions.accepted.filter((item) => !samePair(item, pair))
     }
-    void reconcileCase(caseId, next, 'action')
+    const nextAudit = prependAudit(audit, createAuditEntry('REJECT', pair))
+    void reconcileCase(caseId, next, nextAudit, 'action')
   }
 
   const manualPair = (pair: PairDecision) => {
@@ -76,12 +97,14 @@ export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schem
       manual: addUniquePair(decisions.manual, pair),
       rejected: decisions.rejected.filter((item) => !samePair(item, pair))
     }
-    void reconcileCase(caseId, next, 'action')
+    const nextAudit = prependAudit(audit, createAuditEntry('MANUAL', pair))
+    void reconcileCase(caseId, next, nextAudit, 'action')
   }
 
   const resetDecisions = () => {
     const fresh = emptyDecisions()
-    void reconcileCase(caseId, fresh, 'action')
+    clearSavedReviewState(caseId)
+    void reconcileCase(caseId, fresh, [], 'action')
   }
 
   return (
@@ -93,15 +116,16 @@ export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schem
           <p className="subtitle">Explainable POS ↔ settlement reconciliation</p>
         </div>
         <div className="topbar__status">
-          <Status icon={<CheckCircle2 size={14} />} text="Build 1 · 4/4 MVP" tone="good" />
+          <Status icon={<CheckCircle2 size={14} />} text="Build 2 · Competition" tone="good" />
           <Status icon={<ShieldCheck size={14} />} text="Deterministic" />
           <Status icon={<GitCompareArrows size={14} />} text="Human-in-the-loop" />
+          <Status icon={<Save size={14} />} text={decisionCount > 0 ? `${decisionCount} decision${decisionCount === 1 ? '' : 's'} saved` : 'Clean baseline'} />
         </div>
       </header>
 
       <section className="hero-panel">
         <div>
-          <p className="kicker">Multi-pass deterministic reconciliation</p>
+          <p className="kicker">Case {caseId} · multi-pass deterministic reconciliation</p>
           <h2>Learn the system pattern. Clear only what the evidence can defend.</h2>
           <p>
             ReconFlow canonicalizes messy references, infers the settlement fee and clock shift from clean seed pairs,
@@ -111,22 +135,31 @@ export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schem
         <div className="hero-actions">
           <CaseSelector caseIds={caseIds} value={caseId} onChange={setCaseId} />
           <button className="button button--ghost" onClick={resetDecisions} disabled={busy || loading}>
-            <RotateCcw size={14} /> Reset decisions
+            <RotateCcw size={14} /> Reset demo state
           </button>
         </div>
       </section>
 
       {loading && <div className="notice"><span className="spinner" /> Running reconciliation for {caseId}…</div>}
       {busy && <div className="notice notice--floating"><span className="spinner" /> Recalculating after reviewer decision…</div>}
-      {error && <div className="notice notice--error">{error} <button onClick={() => void reconcileCase(caseId, decisions, 'action')}>Retry</button></div>}
+      {error && <div className="notice notice--error">{error} <button onClick={() => void reconcileCase(caseId, decisions, audit, 'action')}>Retry</button></div>}
 
       {result && !loading && (
         <>
           <SummaryCards metrics={result.metrics} />
           <section className="content-grid">
             <SystemFingerprint result={result} />
+            <FinancialBridge result={result} />
+            <MatchTabs
+              result={result}
+              busy={busy}
+              onAccept={acceptPair}
+              onReject={rejectPair}
+              onManualPair={manualPair}
+            />
+            <AuditTimeline entries={audit} />
             <article className="panel">
-              <div className="panel__head"><div><span className="eyebrow">Case intelligence</span><h3>Source profile</h3></div></div>
+              <div className="panel__head"><div><span className="eyebrow">Case intelligence</span><h3>Source profile · {result.case.id}</h3></div></div>
               <dl className="fact-list">
                 <Fact label="Business date" value={result.case.today} />
                 <Fact label="Reference style" value={result.profile.referenceStyle} />
@@ -135,13 +168,6 @@ export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schem
                 <Fact label="Duplicate settlement rows" value={String(result.profile.duplicateSettlementCount)} />
               </dl>
             </article>
-            <MatchTabs
-              result={result}
-              busy={busy}
-              onAccept={acceptPair}
-              onReject={rejectPair}
-              onManualPair={manualPair}
-            />
           </section>
           {result.decisionWarnings.length > 0 && (
             <div className="notice notice--warn">{result.decisionWarnings.join(' · ')}</div>
@@ -164,6 +190,10 @@ function addUniquePair(items: PairDecision[], pair: PairDecision): PairDecision[
 
 function samePair(left: PairDecision, right: PairDecision): boolean {
   return left.posId === right.posId && left.settlementId === right.settlementId
+}
+
+function prependAudit(entries: AuditEntry[], entry: AuditEntry): AuditEntry[] {
+  return [entry, ...entries].slice(0, 50)
 }
 
 function Status({ icon, text, tone = 'neutral' }: { icon: React.ReactNode; text: string; tone?: 'neutral' | 'good' }) {

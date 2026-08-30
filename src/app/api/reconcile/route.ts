@@ -10,7 +10,7 @@ export async function GET() {
     team: 'Exps',
     teamId: 'LSH26-T022',
     problemId: 'P07',
-    build: 'b1-functional-mvp',
+    build: 'b2-competition',
     caseIds: fixture.cases.map((item) => item.case_id)
   })
 }
