@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import fixtureRaw from '@/data/P07_reconciliation_public.json'
-import { reconcileSkeleton } from '@/domain/reconciliation/reconcile'
+import { reconcile } from '@/domain/reconciliation/reconcile'
 import { fixtureSchema, reconcileRequestSchema } from '@/schemas/reconciliation'
 
 const fixture = fixtureSchema.parse(fixtureRaw)
@@ -10,7 +10,7 @@ export async function GET() {
     team: 'Exps',
     teamId: 'LSH26-T022',
     problemId: 'P07',
-    build: 'b0-skeleton',
+    build: 'b1-functional-mvp',
     caseIds: fixture.cases.map((item) => item.case_id)
   })
 }
@@ -31,5 +31,5 @@ export async function POST(request: Request) {
   const selected = fixture.cases.find((item) => item.case_id === parsed.data.caseId)
   if (!selected) return NextResponse.json({ error: 'Unknown caseId.' }, { status: 404 })
 
-  return NextResponse.json(reconcileSkeleton(selected, parsed.data))
+  return NextResponse.json(reconcile(selected, parsed.data))
 }

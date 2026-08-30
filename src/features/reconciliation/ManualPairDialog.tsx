@@ -1,3 +1,1 @@
-export function ManualPairDialog() {
-  return null // Intentional Build 1/2 seam; do not claim functionality before implementation.
-}
+export function ManualPairDialog() { return null }
