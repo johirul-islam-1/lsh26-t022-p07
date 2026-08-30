@@ -3,6 +3,27 @@ import type { ReconciliationResult } from '@/domain/reconciliation/types'
 
 export type AuditAction = 'ACCEPT' | 'REJECT' | 'MANUAL'
 
+const ACTIVE_CASE_STORAGE_KEY = 'reconflow:p07:b2:active-case'
+
+export function readSavedCaseId(caseIds: string[]): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const saved = window.localStorage.getItem(ACTIVE_CASE_STORAGE_KEY)
+    return saved && caseIds.includes(saved) ? saved : null
+  } catch {
+    return null
+  }
+}
+
+export function writeSavedCaseId(caseId: string): void {
+  if (typeof window === 'undefined' || !caseId) return
+  try {
+    window.localStorage.setItem(ACTIVE_CASE_STORAGE_KEY, caseId)
+  } catch {
+    // Storage can be disabled. The active case still works in memory.
+  }
+}
+
 export interface AuditEntry {
   id: string
   action: AuditAction

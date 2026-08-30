@@ -5,7 +5,15 @@ import { CheckCircle2, Database, GitCompareArrows, RotateCcw, Save, ShieldCheck 
 import type { PairDecision } from '@/schemas/reconciliation'
 import type { ReconciliationResult } from '@/domain/reconciliation/types'
 import { AuditTimeline } from './AuditTimeline'
-import { createAuditEntry, clearSavedReviewState, readSavedReviewState, writeSavedReviewState, type AuditEntry } from './audit'
+import {
+  createAuditEntry,
+  clearSavedReviewState,
+  readSavedCaseId,
+  readSavedReviewState,
+  writeSavedCaseId,
+  writeSavedReviewState,
+  type AuditEntry
+} from './audit'
 import { CaseSelector } from './CaseSelector'
 import { FinancialBridge } from './FinancialBridge'
 import { MatchTabs } from './MatchTabs'
@@ -20,6 +28,7 @@ function emptyDecisions(): Decisions {
 
 export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schemaVersion: string }) {
   const [caseId, setCaseId] = useState(caseIds[0] ?? '')
+  const [caseSelectionReady, setCaseSelectionReady] = useState(false)
   const [decisions, setDecisions] = useState<Decisions>(emptyDecisions)
   const [audit, setAudit] = useState<AuditEntry[]>([])
   const [result, setResult] = useState<ReconciliationResult | null>(null)
@@ -63,13 +72,22 @@ export function Dashboard({ caseIds, schemaVersion }: { caseIds: string[]; schem
   }, [])
 
   useEffect(() => {
+    const fallbackCaseId = caseIds[0] ?? ''
+    const savedCaseId = readSavedCaseId(caseIds)
+    setCaseId(savedCaseId ?? fallbackCaseId)
+    setCaseSelectionReady(true)
+  }, [caseIds])
+
+  useEffect(() => {
+    if (!caseSelectionReady || !caseId) return
+    writeSavedCaseId(caseId)
     const saved = readSavedReviewState(caseId)
     const nextDecisions = saved?.decisions ?? emptyDecisions()
     const nextAudit = saved?.audit ?? []
     setDecisions(nextDecisions)
     setAudit(nextAudit)
     void reconcileCase(caseId, nextDecisions, nextAudit)
-  }, [caseId, reconcileCase])
+  }, [caseId, caseSelectionReady, reconcileCase])
 
   const acceptPair = (pair: PairDecision) => {
     const next: Decisions = {
